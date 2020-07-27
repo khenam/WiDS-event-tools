@@ -1,0 +1,122 @@
+<DOCTYPE html>
+<html>
+<head>
+  <title>Vue Demo #1: The Box App</title>
+  <meta charset='utf-8' />
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/locale/pt-br.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.0/howler.min.js"></script>
+  <style type="text/css">
+    body, html {
+      width: 99%;
+      height: 98%;
+    }
+
+    body {
+      /*background: -webkit-linear-gradient(#b0decd, #238a09);*/
+      /*background: -o-linear-gradient(#b0decd, #238a09);*/
+      /*background: -moz-linear-gradient(#b0decd, #238a09);*/
+      /*background: linear-gradient(#b0decd, #238a09);*/
+      background-image: url(./começo.png);
+      /* Center and scale the image nicely */
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+
+    section.section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 140px;
+      background: transparent;
+    }
+
+    h3.is-3, p.time {
+      color: #00b231;
+    }
+
+    h3.is-3:not(:last-child) {
+      margin: 0;
+      padding: 0;
+    }
+
+    .time {
+      font-size: 7em;
+      margin-left: 31%;
+      margin-top: -8%;
+    }
+
+    .shadow {
+      text-shadow: 0 0 15px rgba(100, 100, 100, .35);
+    }
+  </style>
+</head>
+<body>
+  <section id="app" class="section">
+    <p class="time shadow" @click="changeNextTime" v-text="currentTime"></p>
+  </section>
+<!-- Our View App goes at the end of the document -->
+<script>
+const vueApp = new Vue({
+  el: '#app',
+  data: {
+    message: 'Em Breve:',
+    currentTime: null,
+    nextTime: null,
+    sound: null
+  },
+  methods: {
+    updateCurrentTime() {
+      if (!this.nextTime || !this.nextTime.isValid() || moment().diff(this.nextTime) > 0) {
+        this.currentTime = "00:00:00";
+        return;
+      }
+      var now = moment();
+      var next = moment();
+      var explodedTime = this.nextTime.format('LTS').split(":")
+      next.hours(explodedTime[0])
+      next.minutes(explodedTime[1])
+      next.seconds(explodedTime[2])
+      dur = moment.duration(next.diff(now));
+      this.currentTime = [
+        dur.hours().toString().padStart(2, "0"), 
+        dur.minutes().toString().padStart(2, "0"), 
+        dur.seconds().toString().padStart(2, "0")
+      ].join(":");
+    },
+    changeNextTime() {
+      var nextHour = prompt("Please enter next hour:", "");
+      if (nextHour == null || nextHour == "") {
+        alert("Please insert a valid pt-br time");
+      } else {
+        var explodedTime = nextHour.split(":")
+        var next = moment();
+        next.hours(explodedTime[0])
+        next.minutes(explodedTime[1])
+        next.seconds(explodedTime[2])
+        this.nextTime = next
+      }    
+    }
+  },
+  created() {
+    moment.locale('pt-br');
+    this.currentTime = moment().format('LTS');
+    setInterval(() => this.updateCurrentTime(), 1 * 1000);
+  },
+  mounted() {
+      this.sound = new Howl({
+          src: './megatrev-acoustic-guitar-arrangement.128.mp3',
+          autoplay: true,
+          loop: true,
+          volume: 0.75,
+          onend: function() {
+              console.log('Finished!');
+          }
+      });
+  }
+})
+</script>
+</body>
+</html>
